@@ -199,6 +199,30 @@ export default function Home() {
     drawCanvas(imgObj, texts);
   }, [texts, imgObj]);
 
+
+  // unsplash states and functions
+  const [query, setQuery] = useState("");
+  const [results, setResults] = useState([]);
+
+  const handleSearch = async () => {
+    if (!query) return;
+    const res = await fetch(`/api/search-unsplash?query=${query}`);
+    const data = await res.json();
+    setResults(data.results || []);
+  };
+
+
+  const handleImageSelect = (url) => {
+    const img = new window.Image();
+    img.crossOrigin = "anonymous"; // important for canvas
+    img.onload = () => {
+      setImgObj(img);
+      drawCanvas(img, texts); 
+    };
+    img.src = url;
+  };
+  
+
   return (
     <div className="flex h-screen">
       {/* Left sidebar with tabs */}
@@ -235,17 +259,29 @@ export default function Home() {
                     <Input
                       type="text"
                       placeholder="Search for images..."
+                      value={query}
+                      onChange={(e) => setQuery(e.target.value)}
                       className="w-full"
                     />
-                    <Button className="w-full" variant="outline">
+                    <Button onClick={handleSearch} className="w-full" variant="outline">
                       Search Unsplash
                     </Button>
-                    <div className="text-center text-sm text-gray-500">
-                      <p>Search and select images from Unsplash</p>
-                      <p className="text-xs mt-2">Feature coming soon...</p>
+
+                    {/* Results grid */}
+                    <div className="grid grid-cols-3 gap-2 mt-4">
+                      {results.map((img) => (
+                        <img
+                          key={img.id}
+                          src={img.urls.small}
+                          alt={img.alt_description}
+                          className="rounded cursor-pointer hover:opacity-80"
+                          onClick={() => handleImageSelect(img.urls.full)}
+                        />
+                      ))}
                     </div>
                   </div>
                 </TabsContent>
+
               </Tabs>
             </div>
           </TabsContent>

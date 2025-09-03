@@ -34,7 +34,7 @@ export default function Home() {
     },
     {
       label: "noori",
-      name: "JameelNastaleeq"
+      name: "Noto Jameel"
     },
 ]
 
@@ -244,7 +244,7 @@ export default function Home() {
     const textsArray = Array.isArray(newTexts) && newTexts.length > 0 ? newTexts : texts;
   
   for (const text of textsArray) {
-    ctx.fillStyle = text.color;
+    ctx.save();
     
     if (text.font === "noori") {
       // Wait for font to load
@@ -258,6 +258,7 @@ export default function Home() {
       ctx.textAlign = "center";
     }
     
+    ctx.fillStyle = text.color;
     ctx.fillText(text.value, text.x, text.y);
   }
   }
@@ -290,7 +291,7 @@ export default function Home() {
       try {
         // Check if font is already loaded
         if (!document.fonts.check('16px JameelNastaleeq')) {
-          const font = new FontFace('JameelNastaleeq', 'url(/fonts/noori.ttf)');
+          const font = new FontFace('JameelNastaleeq', 'url(/fonts/noto-jameel.ttf)');
           await font.load();
           document.fonts.add(font);
           console.log('JameelNastaleeq font loaded successfully');

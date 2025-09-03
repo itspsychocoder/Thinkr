@@ -1,0 +1,92 @@
+[
+    {
+      "id": 1,
+      "text": "محبت میں نہیں ہے فرق جینے اور مرنے کا",
+      "category": "love",
+      "poet": "Jaun Elia"
+    },
+    {
+      "id": 2,
+      "text": "ہم کو معلوم ہے جنت کی حقیقت لیکن",
+      "category": "philosophy",
+      "poet": "Jaun Elia"
+    },
+    {
+      "id": 3,
+      "text": "دل سے دل تک بات ہونی چاہیے",
+      "category": "emotion",
+      "poet": "Jaun Elia"
+    },
+    {
+      "id": 4,
+      "text": "ہزاروں خواہشیں ایسی کہ ہر خواہش پہ دم نکلے",
+      "category": "desire",
+      "poet": "Mirza Ghalib"
+    },
+    {
+      "id": 5,
+      "text": "دل ہی تو ہے نہ سنگ و خشت درد سے بھر نہ آئے کیوں",
+      "category": "pain",
+      "poet": "Mirza Ghalib"
+    },
+    {
+      "id": 6,
+      "text": "خوشی سے مر نہ جائیں کہیں دیوانے",
+      "category": "joy",
+      "poet": "Ahmad Faraz"
+    },
+    {
+      "id": 7,
+      "text": "اب کے ہم بچھڑے تو شاید کبھی خوابوں میں ملیں",
+      "category": "separation",
+      "poet": "Ahmad Faraz"
+    },
+    {
+      "id": 8,
+      "text": "تو جو نہیں تو کچھ بھی نہیں",
+      "category": "love",
+      "poet": "Faiz Ahmad Faiz"
+    },
+    {
+      "id": 9,
+      "text": "چاند نکلا ہے ستاروں کے درمیان سے",
+      "category": "beauty",
+      "poet": "Ibn-e-Insha"
+    },
+    {
+      "id": 10,
+      "text": "زندگی کیا ہے عناصر میں ظہور ترتیب",
+      "category": "life",
+      "poet": "Allama Iqbal"
+    },
+    {
+      "id": 11,
+      "text": "خودی کو کر بلند اتنا کہ ہر تقدیر سے پہلے",
+      "category": "motivation",
+      "poet": "Allama Iqbal"
+    },
+    {
+      "id": 12,
+      "text": "میں اکیلا ہی چلا تھا جانب منزل مگر",
+      "category": "journey",
+      "poet": "Josh Malihabadi"
+    },
+    {
+      "id": 13,
+      "text": "وقت کی قلت ہے ورنہ بات بہت ہے",
+      "category": "time",
+      "poet": "Jaun Elia"
+    },
+    {
+      "id": 14,
+      "text": "اداسی ایک بیماری ہے لیکن اچھی بیماری ہے",
+      "category": "melancholy",
+      "poet": "Jaun Elia"
+    },
+    {
+      "id": 15,
+      "text": "کوئی دن گار سے گزرا ہی نہیں ان دنوں",
+      "category": "difficulty",
+      "poet": "Qateel Shifai"
+    }
+  ]

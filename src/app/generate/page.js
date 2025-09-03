@@ -15,10 +15,28 @@ import {
 } from "@/components/ui/select";
 import { useEffect, useRef, useState } from "react";
 import RightSidebar from "@/components/RightSidebar";
+import PreMadeTexts from "@/components/PreMadeTexts";
 
 export default function Home() {
   const [zoom, setZoom] = useState(0.3); // Default zoom level
-
+  const availableFonts = [
+    {
+      label: "arial",
+      name: "Arial"
+    },
+    {
+      label: "times",
+      name: "Times New Roman"
+    },
+    {
+      label: "helvetica",
+      name: "Helvetica"
+    },
+    {
+      label: "noori",
+      name: "JameelNastaleeq"
+    },
+]
 
   const [selectedPlatform, setSelectedPlatform] = useState("instagram");
 
@@ -114,66 +132,68 @@ export default function Home() {
   const handleMouseDown = (e) => {
     const canvas = canvasRef.current;
     const rect = canvas.getBoundingClientRect();
-    
+
     // Calculate scale factors for zoom
     const scaleX = canvas.width / rect.width;
     const scaleY = canvas.height / rect.height;
-    
+
     const x = (e.clientX - rect.left) * scaleX;
     const y = (e.clientY - rect.top) * scaleY;
-  
+
     texts.forEach(element => {
       const ctx = canvas.getContext("2d");
       ctx.font = `${element.size}px ${element.font}`;
       const textWidth = ctx.measureText(element.value).width;
       const textHeight = element.size;
-  
-    // Check if click is within text bounds (considering center alignment)
-    if (
-      x >= element.x - textWidth/2 &&
-      x <= element.x + textWidth/2 &&
-      y <= element.y &&
-      y >= element.y - textHeight
-    ) {
-      setDragging(true);
-      setCurrentId(element.id);
-      offsetRef.current = { x: x - element.x, y: y - element.y };
-    }
-  });
-};
 
-const handleMouseMove = (e) => {
-  if (!dragging || !imgObj) return;
-  const canvas = canvasRef.current;
-  const rect = canvas.getBoundingClientRect();
-  
-  // Calculate scale factors for zoom
-  const scaleX = canvas.width / rect.width;
-  const scaleY = canvas.height / rect.height;
-  
-  const x = (e.clientX - rect.left) * scaleX;
-  const y = (e.clientY - rect.top) * scaleY;
-
-  const newPos = {
-    x: x - offsetRef.current.x,
-    y: y - offsetRef.current.y,
+      // Check if click is within text bounds (considering center alignment)
+      if (
+        x >= element.x - textWidth / 2 &&
+        x <= element.x + textWidth / 2 &&
+        y <= element.y &&
+        y >= element.y - textHeight
+      ) {
+        setDragging(true);
+        setCurrentId(element.id);
+        offsetRef.current = { x: x - element.x, y: y - element.y };
+      }
+    });
   };
-  let otherElements = texts.filter(text => text.id !== currentId);
-  let elementToChange = texts.find(item => item.id === currentId);
-  
-  if (elementToChange) {
-    elementToChange.x = newPos.x;
-    elementToChange.y = newPos.y;
-    setTexts([...otherElements, elementToChange]);
-  }
-};
+
+  const handleMouseMove = (e) => {
+    if (!dragging || !imgObj) return;
+    const canvas = canvasRef.current;
+    const rect = canvas.getBoundingClientRect();
+
+    // Calculate scale factors for zoom
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
+
+    const x = (e.clientX - rect.left) * scaleX;
+    const y = (e.clientY - rect.top) * scaleY;
+
+    const newPos = {
+      x: x - offsetRef.current.x,
+      y: y - offsetRef.current.y,
+    };
+    let otherElements = texts.filter(text => text.id !== currentId);
+    let elementToChange = texts.find(item => item.id === currentId);
+
+    if (elementToChange) {
+      console.log(elementToChange)
+      elementToChange.x = newPos.x;
+      elementToChange.y = newPos.y;
+      setTexts([...otherElements, elementToChange]);
+    }
+  };
 
 
   const handleMouseUp = () => {
     setDragging(false)
   }
 
-  const drawCanvas = (img, newTexts) => {
+  const drawCanvas = async (img, newTexts) => {
+  
     const canvas = canvasRef.current
     const ctx = canvas.getContext("2d")
 
@@ -221,45 +241,67 @@ const handleMouseMove = (e) => {
       }
     }
 
-    // Draw texts
-    if (Array.isArray(newTexts) && newTexts.length > 0) {
-      newTexts.forEach(text => {
-        ctx.font = `${text.size}px ${text.font}`
-        ctx.fillStyle = text.color
-        ctx.textAlign = "center"
-        ctx.fillText(text.value, text.x, text.y)
-      });
+    const textsArray = Array.isArray(newTexts) && newTexts.length > 0 ? newTexts : texts;
+  
+  for (const text of textsArray) {
+    ctx.fillStyle = text.color;
+    
+    if (text.font === "noori") {
+      // Wait for font to load
+      await document.fonts.load(`${text.size}px JameelNastaleeq`);
+      ctx.font = `${text.size}px JameelNastaleeq, Arial`;
+      ctx.direction = "rtl";
+      ctx.textAlign = "center";
+    } else {
+      ctx.font = `${text.size}px ${text.font}`;
+      ctx.direction = "ltr";
+      ctx.textAlign = "center";
     }
-    else {
-      texts.forEach(text => {
-        ctx.font = `${text.size}px ${text.font}`
-        ctx.fillStyle = text.color
-        ctx.textAlign = "center"
-        ctx.fillText(text.value, text.x, text.y)
-      });
-    }
+    
+    ctx.fillText(text.value, text.x, text.y);
+  }
   }
 
   const handleTextAdd = () => {
     if (!text.trim()) return; // Don't add empty text
-    
+
     let newId = texts.length + 1;
     const platform = platforms[selectedPlatform];
-    
+
     // Place text in center of canvas
-    let newItem = { 
-      id: newId, 
-      value: text, 
-      font: font, 
-      size: fontSize, 
-      color: fontColor, 
+    let newItem = {
+      id: newId,
+      value: text,
+      font: font,
+      size: fontSize,
+      color: fontColor,
       x: platform.width / 2,  // Center horizontally
       y: platform.height / 2  // Center vertically
     };
-    
+
     setTexts([...texts, newItem]);
     setText(""); // Clear input after adding
   };
+
+
+  // font loading
+  useEffect(() => {
+    const loadFont = async () => {
+      try {
+        // Check if font is already loaded
+        if (!document.fonts.check('16px JameelNastaleeq')) {
+          const font = new FontFace('JameelNastaleeq', 'url(/fonts/noori.ttf)');
+          await font.load();
+          document.fonts.add(font);
+          console.log('JameelNastaleeq font loaded successfully');
+        }
+      } catch (error) {
+        console.error('Font loading failed:', error);
+      }
+    };
+    
+    loadFont();
+  }, []);
 
 
   useEffect(() => {
@@ -307,7 +349,7 @@ const handleMouseMove = (e) => {
 
   useEffect(() => {
     if (!canvasRef.current) return;
-    
+
     if (imgObj) {
       drawCanvas(imgObj, texts);
     } else {
@@ -321,7 +363,7 @@ const handleMouseMove = (e) => {
       ctx.fillRect(0, 0, canvas.width, canvas.height);
     }
   }, [selectedPlatform, zoom, imageFitOption, texts]); // Added texts to dependencies
-  
+
 
   return (
     <div className="flex h-screen">
@@ -356,8 +398,8 @@ const handleMouseMove = (e) => {
                 </Select>
               </div>
 
-                   {/* Image Fit Option */}
-                   <div className="space-y-2">
+              {/* Image Fit Option */}
+              <div className="space-y-2">
                 <Label htmlFor="image-fit">Image Fitting</Label>
                 <Select value={imageFitOption} onValueChange={setImageFitOption}>
                   <SelectTrigger className="w-full">
@@ -438,14 +480,16 @@ const handleMouseMove = (e) => {
               </div>
               <div className="space-y-2">
                 <Label htmlFor="font-family">Font Family</Label>
-                <Select>
+                <Select value={font} onValueChange={setFont}>
                   <SelectTrigger className="w-full">
                     <SelectValue placeholder="Select a font" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="arial">Arial</SelectItem>
-                    <SelectItem value="times">Times New Roman</SelectItem>
-                    <SelectItem value="helvetica">Helvetica</SelectItem>
+                    {
+                      availableFonts.map((f) => (
+                        <SelectItem key={f.label} value={f.label}>{f.name}</SelectItem>
+                      ))
+                    }
                   </SelectContent>
                 </Select>
               </div>
@@ -454,19 +498,23 @@ const handleMouseMove = (e) => {
 
           <TabsContent value="pretext" className="mt-4">
             <div className="space-y-4">
-              <h3 className="font-semibold">Pre-made Texts</h3>
+              {/* Add text section first */}
               <div className="space-y-2">
-                <Button variant="outline" className="w-full justify-start">Sample Text 1</Button>
-                <Button variant="outline" className="w-full justify-start">Sample Text 2</Button>
-                <Button variant="outline" className="w-full justify-start">Sample Text 3</Button>
+                <h3 className="font-semibold">Add Custom Text</h3>
+                <Textarea
+                  value={text}
+                  onChange={e => setText(e.target.value)}
+                  placeholder="Add custom text..."
+                  className="w-full h-20"
+                />
+                <Button onClick={handleTextAdd} className="w-full">Add Text</Button>
               </div>
-              <Textarea
-                value={text}
-                onChange={e => setText(e.target.value)}
-                placeholder="Add custom text..."
-                className="w-full h-20"
-              />
-              <Button onClick={handleTextAdd} className="w-full justify-start">Add Text</Button>
+
+              {/* Divider */}
+              <div className="border-t border-gray-300"></div>
+
+              {/* Pre-made texts component */}
+              <PreMadeTexts setText={setText} />
             </div>
           </TabsContent>
 
@@ -564,6 +612,7 @@ const handleMouseMove = (e) => {
 
       {/* Right sidebar */}
       <RightSidebar
+      fonts={availableFonts}
         texts={texts}
         currentId={currentId}
         setCurrentId={setCurrentId}

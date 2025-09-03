@@ -18,7 +18,8 @@ export default function RightSidebar({
   currentId, 
   setCurrentId, 
   updateSelectedText, 
-  deleteSelectedText 
+  deleteSelectedText,
+  fonts
 }) {
   const selectedText = texts.find(t => t.id === currentId);
 
@@ -73,9 +74,11 @@ export default function RightSidebar({
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="Arial">Arial</SelectItem>
-                      <SelectItem value="Times New Roman">Times New Roman</SelectItem>
-                      <SelectItem value="Helvetica">Helvetica</SelectItem>
+                    {
+                      fonts.map((f) => (
+                        <SelectItem key={f.label} value={f.label}>{f.name}</SelectItem>
+                      ))
+                    }
                     </SelectContent>
                   </Select>
                 </div>

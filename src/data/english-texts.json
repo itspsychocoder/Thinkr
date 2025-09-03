@@ -1,0 +1,42 @@
+[
+    {
+      "id": 1,
+      "text": "Success is not final, failure is not fatal: it is the courage to continue that counts.",
+      "category": "motivation"
+    },
+    {
+      "id": 2,
+      "text": "The only way to do great work is to love what you do.",
+      "category": "inspiration"
+    },
+    {
+      "id": 3,
+      "text": "Innovation distinguishes between a leader and a follower.",
+      "category": "business"
+    },
+    {
+      "id": 4,
+      "text": "Your limitation—it's only your imagination.",
+      "category": "motivation"
+    },
+    {
+      "id": 5,
+      "text": "Great things never come from comfort zones.",
+      "category": "inspiration"
+    },
+    {
+      "id": 6,
+      "text": "Dream it. Wish it. Do it.",
+      "category": "motivation"
+    },
+    {
+      "id": 7,
+      "text": "Success doesn't just find you. You have to go out and get it.",
+      "category": "success"
+    },
+    {
+      "id": 8,
+      "text": "The harder you work for something, the greater you'll feel when you achieve it.",
+      "category": "motivation"
+    }
+  ]

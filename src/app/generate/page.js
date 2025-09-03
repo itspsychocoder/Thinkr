@@ -571,7 +571,7 @@ export default function Home() {
                     className="w-full dark:bg-gray-700 dark:border-gray-600 dark:text-white" 
                   />
                   <p className="text-sm text-gray-600 dark:text-gray-400">Upload an image from your device</p>
-                  <p className="dark:text-white">Selected Text: {currentId}</p>
+                  {/* <p className="dark:text-white">Selected Text: {currentId}</p> */}
                 </div>
               </TabsContent>
 
@@ -864,7 +864,30 @@ export default function Home() {
       <div className="flex-1 bg-white dark:bg-gray-900 p-4 flex flex-col">
         <div className="flex items-center justify-center mb-4 space-x-4">
           <Label className="text-sm dark:text-white">Zoom:</Label>
-          {/* Add dark classes to zoom controls */}
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setZoom(Math.max(0.1, zoom - 0.1))}
+          >
+            -
+          </Button>
+          <Input
+            type="range"
+            min="0.1"
+            max="1"
+            step="0.1"
+            value={zoom}
+            onChange={(e) => setZoom(parseFloat(e.target.value))}
+            className="w-32"
+          />
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setZoom(Math.min(1, zoom + 0.1))}
+          >
+            +
+          </Button>
+          <span className="text-sm text-gray-600">{Math.round(zoom * 100)}%</span>
         </div>
 
         <div className="flex-1 flex items-center justify-center">

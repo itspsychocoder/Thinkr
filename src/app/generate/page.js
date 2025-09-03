@@ -14,166 +14,190 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useEffect, useRef, useState } from "react";
+import RightSidebar from "@/components/RightSidebar";
 
 export default function Home() {
-    const canvasRef = useRef(null)
+  const canvasRef = useRef(null)
 
-    const [imgObj, setImgObj] = useState(null)
-   
-    const [texts, setTexts] = useState([])
+  const [imgObj, setImgObj] = useState(null)
 
-    const [font, setFont] = useState("Arial")
-    const [fontSize, setFontSize] = useState(40)
-    const [fontColor, setFontColor] = useState("#FFFFFF")
+  const [texts, setTexts] = useState([])
 
-    const [dragging, setDragging] = useState(false)
+  const [font, setFont] = useState("Arial")
+  const [fontSize, setFontSize] = useState(40)
+  const [fontColor, setFontColor] = useState("#FFFFFF")
 
-    const [currentId, setCurrentId] = useState(0)
+  const [dragging, setDragging] = useState(false)
 
-    const [text, setText] = useState("")
-  
-    // Keep track of mouse offset inside text
-    const offsetRef = useRef({ x: 0, y: 0 })
+  const [currentId, setCurrentId] = useState(0)
 
-    const handleImageUpload = (e) => {
-        const file = e.target.files[0]
-        console.log(file)
-        if (!file) return
-    
-        const reader = new FileReader()
-        reader.onload = function (event) {
-          const img = new window.Image()
-          img.onload = function () {
-            const canvas = canvasRef.current
-            const ctx = canvas.getContext("2d")
-    
-            // Clear canvas
-            ctx.clearRect(0, 0, canvas.width, canvas.height)
-    
-            // Resize canvas to image
-            canvas.width = img.width
-            canvas.height = img.height
-    
-            // Draw image on canvas
-            setImgObj(img)
-            ctx.drawImage(img, 0, 0)
-          }
-          img.src = event.target.result
-        }
-        reader.readAsDataURL(file)
-      }
+  const [text, setText] = useState("")
 
-      const handleMouseDown = (e) => {
-        const canvas = canvasRef.current
-        const rect = canvas.getBoundingClientRect()
-        const x = e.clientX - rect.left
-        const y = e.clientY - rect.top
-      
-        const ctx = canvas.getContext("2d")
-        ctx.font = `${fontSize}px ${font}`
-        const textWidth = ctx.measureText(text).width
-        const textHeight = fontSize // rough estimate
+  // Keep track of mouse offset inside text
+  const offsetRef = useRef({ x: 0, y: 0 })
 
-        texts.forEach(element=> {
+  const updateSelectedText = (property, value) => {
+    const selectedText = texts.find(t => t.id === currentId);
+    if (!selectedText) return;
 
-            // ✅ check bounding box of current text
-        if (
-            x >= element.x &&
-            x <= element.x + textWidth &&
-            y <= element.y &&
-            y >= element.y - textHeight
-          ) {
-            setDragging(true)
-            setCurrentId(element.id)
-            offsetRef.current = { x: x - element.x, y: y - element.y }
-          }
-            
-        })
-      
-        
-      }
-      
-      const handleMouseMove = (e) => {
-        if (!dragging || !imgObj) return
-        const canvas = canvasRef.current
-        const rect = canvas.getBoundingClientRect()
-        const x = e.clientX - rect.left
-        const y = e.clientY - rect.top
-      
-        const newPos = {
-          x: x - offsetRef.current.x,
-          y: y - offsetRef.current.y,
-        }
-        let otherElements = texts.filter(text => text.id != currentId);
-        let elementToChange = texts.find(item => item.id === currentId);
-        elementToChange.x = newPos.x;
-        elementToChange.y = newPos.y;
-        console.log("Element Changed: ", elementToChange)
+    const updatedTexts = texts.map(text =>
+      text.id === currentId
+        ? { ...text, [property]: value }
+        : text
+    );
+    setTexts(updatedTexts);
+  };
 
-        setTexts([...otherElements, elementToChange]);
-      
-        drawCanvas(imgObj)
-      }
+  const deleteSelectedText = () => {
+    const selectedText = texts.find(t => t.id === currentId);
+    if (!selectedText) return;
 
-      const handleMouseUp = () => {
-        setDragging(false)
-      }
+    const updatedTexts = texts.filter(text => text.id !== currentId);
+    setTexts(updatedTexts);
+    setCurrentId(0);
+  };
 
-      const drawCanvas = (img, newTexts) => {
+
+
+  const handleImageUpload = (e) => {
+    const file = e.target.files[0]
+    console.log(file)
+    if (!file) return
+
+    const reader = new FileReader()
+    reader.onload = function (event) {
+      const img = new window.Image()
+      img.onload = function () {
         const canvas = canvasRef.current
         const ctx = canvas.getContext("2d")
-      
-        // Resize canvas to match image
+
+        // Clear canvas
+        ctx.clearRect(0, 0, canvas.width, canvas.height)
+
+        // Resize canvas to image
         canvas.width = img.width
         canvas.height = img.height
-      
-        // Draw image
+
+        // Draw image on canvas
+        setImgObj(img)
         ctx.drawImage(img, 0, 0)
-
-        if (Array.isArray(newTexts) && newTexts.length > 0) {
-            newTexts.forEach(text => {
-                ctx.font = `${text.size}px ${text.font}`
-                ctx.fillStyle = text.color
-                ctx.textAlign = "center"
-                ctx.fillText(text.value, text.x, text.y)
-            });
-        }
-        else{
-            texts.forEach(text => {
-                ctx.font = `${text.size}px ${text.font}`
-                ctx.fillStyle = text.color
-                ctx.textAlign = "center"
-                ctx.fillText(text.value, text.x, text.y)
-            });
-        }
       }
-      
-      const handleTextAdd = () => {
-        let newId = texts.length + 1
-        let newItem = {id: newId, value: text, font: font, size: fontSize, color: fontColor, x:100, y:100}
-        setTexts([...texts, newItem]);
+      img.src = event.target.result
+    }
+    reader.readAsDataURL(file)
+  }
+
+  const handleMouseDown = (e) => {
+    const canvas = canvasRef.current
+    const rect = canvas.getBoundingClientRect()
+    const x = e.clientX - rect.left
+    const y = e.clientY - rect.top
+
+    const ctx = canvas.getContext("2d")
+    ctx.font = `${fontSize}px ${font}`
+    const textWidth = ctx.measureText(text).width
+    const textHeight = fontSize // rough estimate
+
+    texts.forEach(element => {
+
+      // ✅ check bounding box of current text
+      if (
+        x >= element.x &&
+        x <= element.x + textWidth &&
+        y <= element.y &&
+        y >= element.y - textHeight
+      ) {
+        setDragging(true)
+        setCurrentId(element.id)
+        offsetRef.current = { x: x - element.x, y: y - element.y }
       }
 
+    })
 
-      useEffect(() => {
-        const canvas = canvasRef.current
-        canvas.addEventListener("mousedown", handleMouseDown)
-        canvas.addEventListener("mousemove", handleMouseMove)
-        canvas.addEventListener("mouseup", handleMouseUp)
-        canvas.addEventListener("mouseleave", handleMouseUp)
-    
-        return () => {
-          canvas.removeEventListener("mousedown", handleMouseDown)
-          canvas.removeEventListener("mousemove", handleMouseMove)
-          canvas.removeEventListener("mouseup", handleMouseUp)
-          canvas.removeEventListener("mouseleave", handleMouseUp)
-        }
-      })
 
-      useEffect(() => {
-        if (!canvasRef.current || !imgObj) return;
-        drawCanvas(imgObj, texts);
-      }, [texts, imgObj]);
+  }
+
+  const handleMouseMove = (e) => {
+    if (!dragging || !imgObj) return
+    const canvas = canvasRef.current
+    const rect = canvas.getBoundingClientRect()
+    const x = e.clientX - rect.left
+    const y = e.clientY - rect.top
+
+    const newPos = {
+      x: x - offsetRef.current.x,
+      y: y - offsetRef.current.y,
+    }
+    let otherElements = texts.filter(text => text.id != currentId);
+    let elementToChange = texts.find(item => item.id === currentId);
+    elementToChange.x = newPos.x;
+    elementToChange.y = newPos.y;
+    console.log("Element Changed: ", elementToChange)
+
+    setTexts([...otherElements, elementToChange]);
+
+    drawCanvas(imgObj)
+  }
+
+  const handleMouseUp = () => {
+    setDragging(false)
+  }
+
+  const drawCanvas = (img, newTexts) => {
+    const canvas = canvasRef.current
+    const ctx = canvas.getContext("2d")
+
+    // Resize canvas to match image
+    canvas.width = img.width
+    canvas.height = img.height
+
+    // Draw image
+    ctx.drawImage(img, 0, 0)
+
+    if (Array.isArray(newTexts) && newTexts.length > 0) {
+      newTexts.forEach(text => {
+        ctx.font = `${text.size}px ${text.font}`
+        ctx.fillStyle = text.color
+        ctx.textAlign = "center"
+        ctx.fillText(text.value, text.x, text.y)
+      });
+    }
+    else {
+      texts.forEach(text => {
+        ctx.font = `${text.size}px ${text.font}`
+        ctx.fillStyle = text.color
+        ctx.textAlign = "center"
+        ctx.fillText(text.value, text.x, text.y)
+      });
+    }
+  }
+
+  const handleTextAdd = () => {
+    let newId = texts.length + 1
+    let newItem = { id: newId, value: text, font: font, size: fontSize, color: fontColor, x: 100, y: 100 }
+    setTexts([...texts, newItem]);
+  }
+
+
+  useEffect(() => {
+    const canvas = canvasRef.current
+    canvas.addEventListener("mousedown", handleMouseDown)
+    canvas.addEventListener("mousemove", handleMouseMove)
+    canvas.addEventListener("mouseup", handleMouseUp)
+    canvas.addEventListener("mouseleave", handleMouseUp)
+
+    return () => {
+      canvas.removeEventListener("mousedown", handleMouseDown)
+      canvas.removeEventListener("mousemove", handleMouseMove)
+      canvas.removeEventListener("mouseup", handleMouseUp)
+      canvas.removeEventListener("mouseleave", handleMouseUp)
+    }
+  })
+
+  useEffect(() => {
+    if (!canvasRef.current || !imgObj) return;
+    drawCanvas(imgObj, texts);
+  }, [texts, imgObj]);
 
   return (
     <div className="flex h-screen">
@@ -186,26 +210,57 @@ export default function Home() {
             <TabsTrigger value="pretext" className="text-xs">Pre-texts</TabsTrigger>
             <TabsTrigger value="download" className="text-xs">Download</TabsTrigger>
           </TabsList>
-          
+
           <TabsContent value="upload" className="mt-4">
             <div className="space-y-4">
               <h3 className="font-semibold">Upload Image</h3>
-              <Input type="file" onChange={handleImageUpload} accept="image/*" className="w-full" />
-              <Button className="w-full">Upload</Button>
-              <p>Selected Text: {currentId}</p>
+
+              {/* Nested tabs for upload methods */}
+              <Tabs defaultValue="local" className="w-full">
+                <TabsList className="grid w-full grid-cols-2 h-10">
+                  <TabsTrigger value="local" className="text-xs">Upload Image</TabsTrigger>
+                  <TabsTrigger value="unsplash" className="text-xs">Unsplash</TabsTrigger>
+                </TabsList>
+
+                <TabsContent value="local" className="mt-4">
+                  <div className="space-y-4">
+                    <Input type="file" onChange={handleImageUpload} accept="image/*" className="w-full" />
+                    <p className="text-sm text-gray-600">Upload an image from your device</p>
+                    <p>Selected Text: {currentId}</p>
+                  </div>
+                </TabsContent>
+
+                <TabsContent value="unsplash" className="mt-4">
+                  <div className="space-y-4">
+                    <Input
+                      type="text"
+                      placeholder="Search for images..."
+                      className="w-full"
+                    />
+                    <Button className="w-full" variant="outline">
+                      Search Unsplash
+                    </Button>
+                    <div className="text-center text-sm text-gray-500">
+                      <p>Search and select images from Unsplash</p>
+                      <p className="text-xs mt-2">Feature coming soon...</p>
+                    </div>
+                  </div>
+                </TabsContent>
+              </Tabs>
             </div>
           </TabsContent>
-          
+
+
           <TabsContent value="style" className="mt-4">
             <div className="space-y-4">
               <h3 className="font-semibold">Style Options</h3>
               <div className="space-y-2">
                 <Label htmlFor="font-color">Font Color</Label>
-                <Input value={fontColor} onChange={e=>setFontColor(e.target.value)} type="color" id="font-color" className="w-full h-10" />
+                <Input value={fontColor} onChange={e => setFontColor(e.target.value)} type="color" id="font-color" className="w-full h-10" />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="font-size">Font Size</Label>
-                <Input value={fontSize} onChange={e=>setFontSize(e.target.value)}  type="range" id="font-size" min="12" max="72" className="w-full" />
+                <Input value={fontSize} onChange={e => setFontSize(e.target.value)} type="range" id="font-size" min="12" max="72" className="w-full" />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="font-family">Font Family</Label>
@@ -222,7 +277,7 @@ export default function Home() {
               </div>
             </div>
           </TabsContent>
-          
+
           <TabsContent value="pretext" className="mt-4">
             <div className="space-y-4">
               <h3 className="font-semibold">Pre-made Texts</h3>
@@ -231,16 +286,16 @@ export default function Home() {
                 <Button variant="outline" className="w-full justify-start">Sample Text 2</Button>
                 <Button variant="outline" className="w-full justify-start">Sample Text 3</Button>
               </div>
-              <Textarea 
-              value={text}
-              onChange={e=>setText(e.target.value)}
-                placeholder="Add custom text..." 
+              <Textarea
+                value={text}
+                onChange={e => setText(e.target.value)}
+                placeholder="Add custom text..."
                 className="w-full h-20"
               />
               <Button onClick={handleTextAdd} className="w-full justify-start">Add Text</Button>
             </div>
           </TabsContent>
-          
+
           <TabsContent value="download" className="mt-4">
             <div className="space-y-4">
               <h3 className="font-semibold">Download Options</h3>
@@ -275,11 +330,20 @@ export default function Home() {
           </TabsContent>
         </Tabs>
       </div>
-      
+
       {/* Right side with canvas */}
       <div className="w-3/4 bg-white p-4 border rounded-md cursor-move">
         <canvas ref={canvasRef} id="mainCanvas" width="800" height="600" className="border border-gray-300"></canvas>
       </div>
+
+      {/* Right sidebar */}
+      <RightSidebar
+        texts={texts}
+        currentId={currentId}
+        setCurrentId={setCurrentId}
+        updateSelectedText={updateSelectedText}
+        deleteSelectedText={deleteSelectedText}
+      />
     </div>
   );
 }

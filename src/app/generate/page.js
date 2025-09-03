@@ -19,6 +19,16 @@ import PreMadeTexts from "@/components/PreMadeTexts";
 
 export default function Home() {
   const [zoom, setZoom] = useState(0.3); // Default zoom level
+  const [brightness, setBrightness] = useState(100);
+  const [contrast, setContrast] = useState(100);
+  const [saturation, setSaturation] = useState(100);
+  const [grayscale, setGrayscale] = useState(0);
+  const [blur, setBlur] = useState(0);
+  const [sepia, setSepia] = useState(0);
+  const [invert, setInvert] = useState(0);
+
+  const [quality, setQuality] = useState("png");
+
   const availableFonts = [
     {
       label: "arial",
@@ -29,6 +39,7 @@ export default function Home() {
       name: "Times New Roman"
     },
     {
+
       label: "helvetica",
       name: "Helvetica"
     },
@@ -36,7 +47,7 @@ export default function Home() {
       label: "noori",
       name: "Noto Jameel"
     },
-]
+  ]
 
   const [selectedPlatform, setSelectedPlatform] = useState("instagram");
 
@@ -193,7 +204,7 @@ export default function Home() {
   }
 
   const drawCanvas = async (img, newTexts) => {
-  
+
     const canvas = canvasRef.current
     const ctx = canvas.getContext("2d")
 
@@ -207,6 +218,15 @@ export default function Home() {
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     if (img) {
+      ctx.filter = `
+      brightness(${brightness}%)
+      contrast(${contrast}%)
+      saturate(${saturation}%)
+      grayscale(${grayscale}%)
+      blur(${blur}px)
+      sepia(${sepia}%)
+      invert(${invert}%)
+    `;
       if (imageFitOption === "stretch") {
         // Stretch to fill entire canvas
         ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
@@ -239,28 +259,30 @@ export default function Home() {
 
         ctx.drawImage(img, x, y, scaledWidth, scaledHeight);
       }
+      ctx.filter = 'none';
     }
 
     const textsArray = Array.isArray(newTexts) && newTexts.length > 0 ? newTexts : texts;
-  
-  for (const text of textsArray) {
-    ctx.save();
-    
-    if (text.font === "noori") {
-      // Wait for font to load
-      await document.fonts.load(`${text.size}px JameelNastaleeq`);
-      ctx.font = `${text.size}px JameelNastaleeq, Arial`;
-      ctx.direction = "rtl";
-      ctx.textAlign = "center";
-    } else {
-      ctx.font = `${text.size}px ${text.font}`;
-      ctx.direction = "ltr";
-      ctx.textAlign = "center";
+
+    for (const text of textsArray) {
+      ctx.save();
+
+      if (text.font === "noori") {
+        // Wait for font to load
+        await document.fonts.load(`${text.size}px JameelNastaleeq`);
+        ctx.font = `${text.size}px JameelNastaleeq, Arial`;
+        ctx.direction = "rtl";
+        ctx.textAlign = "center";
+      } else {
+        ctx.font = `${text.size}px ${text.font}`;
+        ctx.direction = "ltr";
+        ctx.textAlign = "center";
+      }
+
+      ctx.fillStyle = text.color;
+      ctx.fillText(text.value, text.x, text.y);
+      ctx.restore();
     }
-    
-    ctx.fillStyle = text.color;
-    ctx.fillText(text.value, text.x, text.y);
-  }
   }
 
   const handleTextAdd = () => {
@@ -300,7 +322,7 @@ export default function Home() {
         console.error('Font loading failed:', error);
       }
     };
-    
+
     loadFont();
   }, []);
 
@@ -363,8 +385,23 @@ export default function Home() {
       ctx.fillStyle = "#ffffff";
       ctx.fillRect(0, 0, canvas.width, canvas.height);
     }
-  }, [selectedPlatform, zoom, imageFitOption, texts]); // Added texts to dependencies
+  }, [selectedPlatform, zoom, imageFitOption, texts, brightness, contrast, saturation, grayscale, blur, sepia, invert]);
 
+
+  const downloadImage = () => {
+    const canvas = canvasRef.current;
+
+    let mimeType = "image/png";
+    if (quality === "jpg") mimeType = "image/jpeg";
+    if (quality === "png") mimeType = "image/pg";
+
+    const dataURL = canvas.toDataURL(mimeType);
+
+    const link = document.createElement("a");
+    link.href = dataURL;
+    link.download = `canvas-image.${quality}`;
+    link.click();
+  }
 
   return (
     <div className="flex h-screen">
@@ -469,7 +506,7 @@ export default function Home() {
 
 
           <TabsContent value="style" className="mt-4">
-            <div className="space-y-4">
+            <div className="space-y-2 max-h-100 overflow-y-auto">
               <h3 className="font-semibold">Style Options</h3>
               <div className="space-y-2">
                 <Label htmlFor="font-color">Font Color</Label>
@@ -494,7 +531,134 @@ export default function Home() {
                   </SelectContent>
                 </Select>
               </div>
+
+              <div className="border-t border-gray-300"></div>
+
+              {/* Image Styling */}
+              <div className="space-y-4">
+                <h4 className="font-medium text-sm">Image Styling</h4>
+
+                <div className="space-y-2">
+                  <Label htmlFor="brightness">Brightness</Label>
+                  <Input
+                    value={brightness}
+                    onChange={e => setBrightness(e.target.value)}
+                    type="range"
+                    id="brightness"
+                    min="0"
+                    max="200"
+                    className="w-full"
+                  />
+                  <span className="text-xs text-gray-600">{brightness}%</span>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="contrast">Contrast</Label>
+                  <Input
+                    value={contrast}
+                    onChange={e => setContrast(e.target.value)}
+                    type="range"
+                    id="contrast"
+                    min="0"
+                    max="200"
+                    className="w-full"
+                  />
+                  <span className="text-xs text-gray-600">{contrast}%</span>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="saturation">Saturation</Label>
+                  <Input
+                    value={saturation}
+                    onChange={e => setSaturation(e.target.value)}
+                    type="range"
+                    id="saturation"
+                    min="0"
+                    max="200"
+                    className="w-full"
+                  />
+                  <span className="text-xs text-gray-600">{saturation}%</span>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="grayscale">Grayscale</Label>
+                  <Input
+                    value={grayscale}
+                    onChange={e => setGrayscale(e.target.value)}
+                    type="range"
+                    id="grayscale"
+                    min="0"
+                    max="100"
+                    className="w-full"
+                  />
+                  <span className="text-xs text-gray-600">{grayscale}%</span>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="blur">Blur</Label>
+                  <Input
+                    value={blur}
+                    onChange={e => setBlur(e.target.value)}
+                    type="range"
+                    id="blur"
+                    min="0"
+                    max="10"
+                    step="0.1"
+                    className="w-full"
+                  />
+                  <span className="text-xs text-gray-600">{blur}px</span>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="sepia">Sepia</Label>
+                  <Input
+                    value={sepia}
+                    onChange={e => setSepia(e.target.value)}
+                    type="range"
+                    id="sepia"
+                    min="0"
+                    max="100"
+                    className="w-full"
+                  />
+                  <span className="text-xs text-gray-600">{sepia}%</span>
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="invert">Invert</Label>
+                  <Input
+                    value={invert}
+                    onChange={e => setInvert(e.target.value)}
+                    type="range"
+                    id="invert"
+                    min="0"
+                    max="100"
+                    className="w-full"
+                  />
+                  <span className="text-xs text-gray-600">{invert}%</span>
+                </div>
+
+                {/* Reset button */}
+                <Button
+                  variant="outline"
+                  className="w-full"
+                  onClick={() => {
+                    setBrightness(100);
+                    setContrast(100);
+                    setSaturation(100);
+                    setGrayscale(0);
+                    setBlur(0);
+                    setSepia(0);
+                    setInvert(0);
+                  }}
+                >
+                  Reset Filters
+                </Button>
+              </div>
             </div>
+
+
+
+
           </TabsContent>
 
           <TabsContent value="pretext" className="mt-4">
@@ -524,14 +688,13 @@ export default function Home() {
               <h3 className="font-semibold">Download Options</h3>
               <div className="space-y-2">
                 <Label htmlFor="format">Format</Label>
-                <Select>
+                <Select value={quality} onValueChange={setQuality}>
                   <SelectTrigger className="w-full">
                     <SelectValue placeholder="Select format" />
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="png">PNG</SelectItem>
                     <SelectItem value="jpg">JPG</SelectItem>
-                    <SelectItem value="svg">SVG</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -548,10 +711,36 @@ export default function Home() {
                   </SelectContent>
                 </Select>
               </div>
-              <Button className="w-full" variant="default">Download Image</Button>
+              <Button onClick={downloadImage} className="w-full" variant="default">Download Image</Button>
             </div>
           </TabsContent>
         </Tabs>
+
+        {/* Credits Section */}
+      <div className="mt-4 pt-4 border-t border-gray-300">
+        <div className="text-center space-y-2">
+          <div className="text-xs text-gray-600">Created by</div>
+          <div className="text-sm font-semibold text-gray-800">Psycho Coder</div>
+          <div className="space-y-1">
+            <a 
+              href="https://github.com/itspsychocoder" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="block text-xs text-blue-600 hover:text-blue-800 transition-colors"
+            >
+              GitHub: itspsychocoder
+            </a>
+            <a 
+              href="https://hussnainahmad.tech" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="block text-xs text-blue-600 hover:text-blue-800 transition-colors"
+            >
+              hussnainahmad.tech
+            </a>
+          </div>
+        </div>
+      </div>
       </div>
 
       {/* Center canvas area */}
@@ -613,7 +802,7 @@ export default function Home() {
 
       {/* Right sidebar */}
       <RightSidebar
-      fonts={availableFonts}
+        fonts={availableFonts}
         texts={texts}
         currentId={currentId}
         setCurrentId={setCurrentId}

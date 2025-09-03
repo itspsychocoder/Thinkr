@@ -17,6 +17,40 @@ import { useEffect, useRef, useState } from "react";
 import RightSidebar from "@/components/RightSidebar";
 
 export default function Home() {
+  const [zoom, setZoom] = useState(0.3); // Default zoom level
+
+
+  const [selectedPlatform, setSelectedPlatform] = useState("instagram");
+
+  // Platform configurations
+  const platforms = {
+    instagram: { width: 1080, height: 1080, name: "Instagram Post" },
+    linkedin: { width: 1200, height: 627, name: "LinkedIn Post" },
+    whatsapp: { width: 1080, height: 1920, name: "WhatsApp Status" },
+    facebook: { width: 1200, height: 630, name: "Facebook Post" },
+    twitter: { width: 1200, height: 675, name: "Twitter Post" }
+  };
+
+  // Add image fit option state
+  const [imageFitOption, setImageFitOption] = useState("fit");
+
+  // Image fit options
+  const imageFitOptions = {
+    fit: {
+      name: "Fit to Canvas",
+      description: "Maintains aspect ratio, may show white space"
+    },
+    stretch: {
+      name: "Stretch to Fill",
+      description: "Fills entire canvas, may distort image"
+    },
+    crop: {
+      name: "Crop to Fill",
+      description: "Fills canvas by cropping image, maintains aspect ratio"
+    }
+  };
+
+
   const canvasRef = useRef(null)
 
   const [imgObj, setImgObj] = useState(null)
@@ -68,19 +102,9 @@ export default function Home() {
     reader.onload = function (event) {
       const img = new window.Image()
       img.onload = function () {
-        const canvas = canvasRef.current
-        const ctx = canvas.getContext("2d")
-
-        // Clear canvas
-        ctx.clearRect(0, 0, canvas.width, canvas.height)
-
-        // Resize canvas to image
-        canvas.width = img.width
-        canvas.height = img.height
-
-        // Draw image on canvas
-        setImgObj(img)
-        ctx.drawImage(img, 0, 0)
+        setImgObj(img);
+        // Use drawCanvas instead of manually drawing
+        drawCanvas(img, texts)
       }
       img.src = event.target.result
     }
@@ -88,56 +112,62 @@ export default function Home() {
   }
 
   const handleMouseDown = (e) => {
-    const canvas = canvasRef.current
-    const rect = canvas.getBoundingClientRect()
-    const x = e.clientX - rect.left
-    const y = e.clientY - rect.top
-
-    const ctx = canvas.getContext("2d")
-    ctx.font = `${fontSize}px ${font}`
-    const textWidth = ctx.measureText(text).width
-    const textHeight = fontSize // rough estimate
-
+    const canvas = canvasRef.current;
+    const rect = canvas.getBoundingClientRect();
+    
+    // Calculate scale factors for zoom
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
+    
+    const x = (e.clientX - rect.left) * scaleX;
+    const y = (e.clientY - rect.top) * scaleY;
+  
     texts.forEach(element => {
-
-      // ✅ check bounding box of current text
-      if (
-        x >= element.x &&
-        x <= element.x + textWidth &&
-        y <= element.y &&
-        y >= element.y - textHeight
-      ) {
-        setDragging(true)
-        setCurrentId(element.id)
-        offsetRef.current = { x: x - element.x, y: y - element.y }
-      }
-
-    })
-
-
-  }
-
-  const handleMouseMove = (e) => {
-    if (!dragging || !imgObj) return
-    const canvas = canvasRef.current
-    const rect = canvas.getBoundingClientRect()
-    const x = e.clientX - rect.left
-    const y = e.clientY - rect.top
-
-    const newPos = {
-      x: x - offsetRef.current.x,
-      y: y - offsetRef.current.y,
+      const ctx = canvas.getContext("2d");
+      ctx.font = `${element.size}px ${element.font}`;
+      const textWidth = ctx.measureText(element.value).width;
+      const textHeight = element.size;
+  
+    // Check if click is within text bounds (considering center alignment)
+    if (
+      x >= element.x - textWidth/2 &&
+      x <= element.x + textWidth/2 &&
+      y <= element.y &&
+      y >= element.y - textHeight
+    ) {
+      setDragging(true);
+      setCurrentId(element.id);
+      offsetRef.current = { x: x - element.x, y: y - element.y };
     }
-    let otherElements = texts.filter(text => text.id != currentId);
-    let elementToChange = texts.find(item => item.id === currentId);
+  });
+};
+
+const handleMouseMove = (e) => {
+  if (!dragging || !imgObj) return;
+  const canvas = canvasRef.current;
+  const rect = canvas.getBoundingClientRect();
+  
+  // Calculate scale factors for zoom
+  const scaleX = canvas.width / rect.width;
+  const scaleY = canvas.height / rect.height;
+  
+  const x = (e.clientX - rect.left) * scaleX;
+  const y = (e.clientY - rect.top) * scaleY;
+
+  const newPos = {
+    x: x - offsetRef.current.x,
+    y: y - offsetRef.current.y,
+  };
+  let otherElements = texts.filter(text => text.id !== currentId);
+  let elementToChange = texts.find(item => item.id === currentId);
+  
+  if (elementToChange) {
     elementToChange.x = newPos.x;
     elementToChange.y = newPos.y;
-    console.log("Element Changed: ", elementToChange)
-
     setTexts([...otherElements, elementToChange]);
-
-    drawCanvas(imgObj)
   }
+};
+
 
   const handleMouseUp = () => {
     setDragging(false)
@@ -147,13 +177,51 @@ export default function Home() {
     const canvas = canvasRef.current
     const ctx = canvas.getContext("2d")
 
-    // Resize canvas to match image
-    canvas.width = img.width
-    canvas.height = img.height
+    const platform = platforms[selectedPlatform];
 
-    // Draw image
-    ctx.drawImage(img, 0, 0)
+    // Set fixed canvas size based on platform
+    canvas.width = platform.width;
+    canvas.height = platform.height;
 
+    ctx.fillStyle = "#ffffff";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    if (img) {
+      if (imageFitOption === "stretch") {
+        // Stretch to fill entire canvas
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+      } else if (imageFitOption === "crop") {
+        // Crop to fill - maintains aspect ratio but crops if needed
+        const scaleX = canvas.width / img.width;
+        const scaleY = canvas.height / img.height;
+        const scale = Math.max(scaleX, scaleY); // Use max instead of min for cropping
+
+        const scaledWidth = img.width * scale;
+        const scaledHeight = img.height * scale;
+
+        // Center the image (may crop edges)
+        const x = (canvas.width - scaledWidth) / 2;
+        const y = (canvas.height - scaledHeight) / 2;
+
+        ctx.drawImage(img, x, y, scaledWidth, scaledHeight);
+      } else {
+        // Fit to canvas - maintains aspect ratio with white space if needed
+        const scaleX = canvas.width / img.width;
+        const scaleY = canvas.height / img.height;
+        const scale = Math.min(scaleX, scaleY);
+
+        const scaledWidth = img.width * scale;
+        const scaledHeight = img.height * scale;
+
+        // Center the image
+        const x = (canvas.width - scaledWidth) / 2;
+        const y = (canvas.height - scaledHeight) / 2;
+
+        ctx.drawImage(img, x, y, scaledWidth, scaledHeight);
+      }
+    }
+
+    // Draw texts
     if (Array.isArray(newTexts) && newTexts.length > 0) {
       newTexts.forEach(text => {
         ctx.font = `${text.size}px ${text.font}`
@@ -173,10 +241,25 @@ export default function Home() {
   }
 
   const handleTextAdd = () => {
-    let newId = texts.length + 1
-    let newItem = { id: newId, value: text, font: font, size: fontSize, color: fontColor, x: 100, y: 100 }
+    if (!text.trim()) return; // Don't add empty text
+    
+    let newId = texts.length + 1;
+    const platform = platforms[selectedPlatform];
+    
+    // Place text in center of canvas
+    let newItem = { 
+      id: newId, 
+      value: text, 
+      font: font, 
+      size: fontSize, 
+      color: fontColor, 
+      x: platform.width / 2,  // Center horizontally
+      y: platform.height / 2  // Center vertically
+    };
+    
     setTexts([...texts, newItem]);
-  }
+    setText(""); // Clear input after adding
+  };
 
 
   useEffect(() => {
@@ -217,10 +300,27 @@ export default function Home() {
     img.crossOrigin = "anonymous"; // important for canvas
     img.onload = () => {
       setImgObj(img);
-      drawCanvas(img, texts); 
+      drawCanvas(img, texts);
     };
     img.src = url;
   };
+
+  useEffect(() => {
+    if (!canvasRef.current) return;
+    
+    if (imgObj) {
+      drawCanvas(imgObj, texts);
+    } else {
+      // Draw empty canvas with white background
+      const canvas = canvasRef.current;
+      const platform = platforms[selectedPlatform];
+      canvas.width = platform.width;
+      canvas.height = platform.height;
+      const ctx = canvas.getContext("2d");
+      ctx.fillStyle = "#ffffff";
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+    }
+  }, [selectedPlatform, zoom, imageFitOption, texts]); // Added texts to dependencies
   
 
   return (
@@ -238,6 +338,44 @@ export default function Home() {
           <TabsContent value="upload" className="mt-4">
             <div className="space-y-4">
               <h3 className="font-semibold">Upload Image</h3>
+
+              {/* Platform Selection */}
+              <div className="space-y-2">
+                <Label htmlFor="platform">Platform</Label>
+                <Select value={selectedPlatform} onValueChange={setSelectedPlatform}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {Object.entries(platforms).map(([key, platform]) => (
+                      <SelectItem key={key} value={key}>
+                        {platform.name} ({platform.width}x{platform.height})
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+                   {/* Image Fit Option */}
+                   <div className="space-y-2">
+                <Label htmlFor="image-fit">Image Fitting</Label>
+                <Select value={imageFitOption} onValueChange={setImageFitOption}>
+                  <SelectTrigger className="w-full">
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {Object.entries(imageFitOptions).map(([key, option]) => (
+                      <SelectItem key={key} value={key}>
+                        {option.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-gray-600">
+                  {imageFitOptions[imageFitOption].description}
+                </p>
+              </div>
+
 
               {/* Nested tabs for upload methods */}
               <Tabs defaultValue="local" className="w-full">
@@ -367,9 +505,61 @@ export default function Home() {
         </Tabs>
       </div>
 
-      {/* Right side with canvas */}
-      <div className="w-3/4 bg-white p-4 border rounded-md cursor-move">
-        <canvas ref={canvasRef} id="mainCanvas" width="800" height="600" className="border border-gray-300"></canvas>
+      {/* Center canvas area */}
+      <div className="flex-1 bg-white p-4 flex flex-col">
+        {/* Zoom controls */}
+        <div className="flex items-center justify-center mb-4 space-x-4">
+          <Label className="text-sm">Zoom:</Label>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setZoom(Math.max(0.1, zoom - 0.1))}
+          >
+            -
+          </Button>
+          <Input
+            type="range"
+            min="0.1"
+            max="1"
+            step="0.1"
+            value={zoom}
+            onChange={(e) => setZoom(parseFloat(e.target.value))}
+            className="w-32"
+          />
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setZoom(Math.min(1, zoom + 0.1))}
+          >
+            +
+          </Button>
+          <span className="text-sm text-gray-600">{Math.round(zoom * 100)}%</span>
+        </div>
+
+        {/* Canvas container with fixed size and scrollbars */}
+        <div className="flex-1 flex items-center justify-center">
+          <div
+            className="border border-gray-300 bg-white shadow-lg overflow-auto"
+            style={{
+              maxWidth: '600px',
+              maxHeight: '500px',
+              width: '600px',
+              height: '500px'
+            }}
+          >
+            <div className="flex items-center justify-center min-h-full">
+              <canvas
+                ref={canvasRef}
+                className="cursor-move block"
+                style={{
+                  width: `${platforms[selectedPlatform].width * zoom}px`,
+                  height: `${platforms[selectedPlatform].height * zoom}px`,
+                  maxWidth: 'none'
+                }}
+              />
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* Right sidebar */}

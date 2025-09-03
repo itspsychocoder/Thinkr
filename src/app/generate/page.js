@@ -498,155 +498,180 @@ export default function Home() {
   }
 
   return (
-    <div className="flex h-screen">
-      {/* Left sidebar with tabs */}
-      <div className="w-1/4 bg-gray-100 p-4">
-        <Tabs defaultValue="upload" className="w-full">
-          <TabsList className="grid w-full grid-cols-2 grid-rows-2 h-20">
-            <TabsTrigger value="upload" className="text-xs">Image Upload</TabsTrigger>
-            <TabsTrigger value="style" className="text-xs">Style</TabsTrigger>
-            <TabsTrigger value="pretext" className="text-xs">Pre-texts</TabsTrigger>
-            <TabsTrigger value="download" className="text-xs">Download</TabsTrigger>
-          </TabsList>
+    <div className="flex h-screen bg-white dark:bg-gray-900">
+    {/* Left sidebar with tabs */}
+    <div className="w-1/4 bg-gray-100 dark:bg-gray-800 p-4">
+      <Tabs defaultValue="upload" className="w-full">
+        <TabsList className="grid w-full grid-cols-2 grid-rows-2 h-20 bg-white dark:bg-gray-700">
+          <TabsTrigger value="upload" className="text-xs dark:text-white dark:data-[state=active]:bg-gray-600">
+            Image Upload
+          </TabsTrigger>
+          <TabsTrigger value="style" className="text-xs dark:text-white dark:data-[state=active]:bg-gray-600">
+            Style
+          </TabsTrigger>
+          <TabsTrigger value="pretext" className="text-xs dark:text-white dark:data-[state=active]:bg-gray-600">
+            Pre-texts
+          </TabsTrigger>
+          <TabsTrigger value="download" className="text-xs dark:text-white dark:data-[state=active]:bg-gray-600">
+            Download
+          </TabsTrigger>
+        </TabsList>
 
-          <TabsContent value="upload" className="mt-4">
-            <div className="space-y-4">
-              <h3 className="font-semibold">Upload Image</h3>
-
-              {/* Platform Selection */}
-              <div className="space-y-2">
-                <Label htmlFor="platform">Platform</Label>
-                <Select value={selectedPlatform} onValueChange={setSelectedPlatform}>
-                  <SelectTrigger className="w-full">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {Object.entries(platforms).map(([key, platform]) => (
-                      <SelectItem key={key} value={key}>
-                        {platform.name} ({platform.width}x{platform.height})
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {/* Image Fit Option */}
-              <div className="space-y-2">
-                <Label htmlFor="image-fit">Image Fitting</Label>
-                <Select value={imageFitOption} onValueChange={setImageFitOption}>
-                  <SelectTrigger className="w-full">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {Object.entries(imageFitOptions).map(([key, option]) => (
-                      <SelectItem key={key} value={key}>
-                        {option.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <p className="text-xs text-gray-600">
-                  {imageFitOptions[imageFitOption].description}
-                </p>
-              </div>
-
-
-              {/* Nested tabs for upload methods */}
-              <Tabs defaultValue="local" className="w-full">
-                <TabsList className="grid w-full grid-cols-2 h-10">
-                  <TabsTrigger value="local" className="text-xs">Upload Image</TabsTrigger>
-                  <TabsTrigger value="unsplash" className="text-xs">Unsplash</TabsTrigger>
-                </TabsList>
-
-                <TabsContent value="local" className="mt-4">
-                  <div className="space-y-4">
-                    <Input type="file" onChange={handleImageUpload} accept="image/*" className="w-full" />
-                    <p className="text-sm text-gray-600">Upload an image from your device</p>
-                    <p>Selected Text: {currentId}</p>
-                  </div>
-                </TabsContent>
-
-                <TabsContent value="unsplash" className="mt-4">
-                  <div className="space-y-4">
-                    <Input
-                      type="text"
-                      placeholder="Search for images..."
-                      value={query}
-                      onChange={(e) => setQuery(e.target.value)}
-                      className="w-full"
-                    />
-                    <Button onClick={handleSearch} className="w-full" variant="outline">
-                      Search Unsplash
-                    </Button>
-
-                    {/* Results grid */}
-                    <div className="grid grid-cols-3 gap-2 mt-4">
-                      {results.map((img) => (
-                        <img
-                          key={img.id}
-                          src={img.urls.small}
-                          alt={img.alt_description}
-                          className="rounded cursor-pointer hover:opacity-80"
-                          onClick={() => handleImageSelect(img.urls.full)}
-                        />
-                      ))}
-                    </div>
-                  </div>
-                </TabsContent>
-
-              </Tabs>
+        <TabsContent value="upload" className="mt-4">
+          <div className="space-y-4">
+            <h3 className="font-semibold dark:text-white">Upload Image</h3>
+            
+            <div className="space-y-2">
+              <Label htmlFor="platform" className="dark:text-gray-200">Platform</Label>
+              <Select value={selectedPlatform} onValueChange={setSelectedPlatform}>
+                <SelectTrigger className="w-full dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="dark:bg-gray-700 dark:border-gray-600">
+                  {Object.entries(platforms).map(([key, platform]) => (
+                    <SelectItem key={key} value={key} className="dark:text-white dark:focus:bg-gray-600">
+                      {platform.name} ({platform.width}x{platform.height})
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
-          </TabsContent>
 
+            <div className="space-y-2">
+              <Label htmlFor="image-fit" className="dark:text-gray-200">Image Fitting</Label>
+              <Select value={imageFitOption} onValueChange={setImageFitOption}>
+                <SelectTrigger className="w-full dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="dark:bg-gray-700 dark:border-gray-600">
+                  {Object.entries(imageFitOptions).map(([key, option]) => (
+                    <SelectItem key={key} value={key} className="dark:text-white dark:focus:bg-gray-600">
+                      {option.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-gray-600 dark:text-gray-400">
+                {imageFitOptions[imageFitOption].description}
+              </p>
+            </div>
 
-          <TabsContent value="style" className="mt-4">
-            <div className="space-y-2 max-h-100 overflow-y-auto">
-              <h3 className="font-semibold">Style Options</h3>
-              <div className="space-y-2">
-                <Label htmlFor="font-color">Font Color</Label>
-                <Input value={fontColor} onChange={e => setFontColor(e.target.value)} type="color" id="font-color" className="w-full h-10" />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="font-size">Font Size</Label>
-                <Input value={fontSize} onChange={e => setFontSize(e.target.value)} type="range" id="font-size" min="12" max="72" className="w-full" />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="font-family">Font Family</Label>
-                <Select value={font} onValueChange={setFont}>
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Select a font" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {
-                      availableFonts.map((f) => (
-                        <SelectItem key={f.label} value={f.label}>{f.name}</SelectItem>
-                      ))
-                    }
-                  </SelectContent>
-                </Select>
-              </div>
+            <Tabs defaultValue="local" className="w-full">
+              <TabsList className="grid w-full grid-cols-2 h-10 dark:bg-gray-700">
+                <TabsTrigger value="local" className="text-xs dark:text-white">Upload Image</TabsTrigger>
+                <TabsTrigger value="unsplash" className="text-xs dark:text-white">Unsplash</TabsTrigger>
+              </TabsList>
 
-              <div className="border-t border-gray-300"></div>
-
-              {/* Image Styling */}
-              <div className="space-y-4">
-                <h4 className="font-medium text-sm">Image Styling</h4>
-
-                <div className="space-y-2">
-                  <Label htmlFor="brightness">Brightness</Label>
-                  <Input
-                    value={brightness}
-                    onChange={e => setBrightness(e.target.value)}
-                    type="range"
-                    id="brightness"
-                    min="0"
-                    max="200"
-                    className="w-full"
+              <TabsContent value="local" className="mt-4">
+                <div className="space-y-4">
+                  <Input 
+                    type="file" 
+                    onChange={handleImageUpload} 
+                    accept="image/*" 
+                    className="w-full dark:bg-gray-700 dark:border-gray-600 dark:text-white" 
                   />
-                  <span className="text-xs text-gray-600">{brightness}%</span>
+                  <p className="text-sm text-gray-600 dark:text-gray-400">Upload an image from your device</p>
+                  <p className="dark:text-white">Selected Text: {currentId}</p>
                 </div>
+              </TabsContent>
 
-                <div className="space-y-2">
+              <TabsContent value="unsplash" className="mt-4">
+                <div className="space-y-4">
+                  <Input
+                    type="text"
+                    placeholder="Search for images..."
+                    value={query}
+                    onChange={(e) => setQuery(e.target.value)}
+                    className="w-full dark:bg-gray-700 dark:border-gray-600 dark:text-white dark:placeholder-gray-400"
+                  />
+                  <Button onClick={handleSearch} className="w-full" variant="outline">
+                    Search Unsplash
+                  </Button>
+                  
+                  <div className="grid grid-cols-3 gap-2 mt-4">
+                    {results.map((img) => (
+                      <img
+                        key={img.id}
+                        src={img.urls.small}
+                        alt={img.alt_description}
+                        className="rounded cursor-pointer hover:opacity-80"
+                        onClick={() => handleImageSelect(img.urls.full)}
+                      />
+                    ))}
+                  </div>
+                </div>
+              </TabsContent>
+            </Tabs>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="style" className="mt-4">
+          <div className="space-y-2 max-h-100 overflow-y-auto">
+            <h3 className="font-semibold dark:text-white">Style Options</h3>
+            
+            <div className="space-y-2">
+              <Label htmlFor="font-color" className="dark:text-gray-200">Font Color</Label>
+              <Input 
+                value={fontColor} 
+                onChange={e => setFontColor(e.target.value)} 
+                type="color" 
+                id="font-color" 
+                className="w-full h-10 dark:bg-gray-700 dark:border-gray-600" 
+              />
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="font-size" className="dark:text-gray-200">Font Size</Label>
+              <Input 
+                value={fontSize} 
+                onChange={e => setFontSize(e.target.value)} 
+                type="range" 
+                id="font-size" 
+                min="12" 
+                max="72" 
+                className="w-full" 
+              />
+              <span className="text-xs text-gray-600 dark:text-gray-400">{fontSize}px</span>
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="font-family" className="dark:text-gray-200">Font Family</Label>
+              <Select value={font} onValueChange={setFont}>
+                <SelectTrigger className="w-full dark:bg-gray-700 dark:border-gray-600 dark:text-white">
+                  <SelectValue placeholder="Select a font" />
+                </SelectTrigger>
+                <SelectContent className="dark:bg-gray-700 dark:border-gray-600">
+                  {availableFonts.map((f) => (
+                    <SelectItem key={f.label} value={f.label} className="dark:text-white dark:focus:bg-gray-600">
+                      {f.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="border-t border-gray-300 dark:border-gray-600"></div>
+
+            <div className="space-y-4">
+              <h4 className="font-medium text-sm dark:text-white">Image Styling</h4>
+              
+              {/* Add dark classes to all the slider sections */}
+              <div className="space-y-2">
+                <Label htmlFor="brightness" className="dark:text-gray-200">Brightness</Label>
+                <Input
+                  value={brightness}
+                  onChange={e => setBrightness(e.target.value)}
+                  type="range"
+                  id="brightness"
+                  min="0"
+                  max="200"
+                  className="w-full"
+                />
+                <span className="text-xs text-gray-600 dark:text-gray-400">{brightness}%</span>
+              </div>
+              
+              
+              <div className="space-y-2">
                   <Label htmlFor="contrast">Contrast</Label>
                   <Input
                     value={contrast}
@@ -657,7 +682,7 @@ export default function Home() {
                     max="200"
                     className="w-full"
                   />
-                  <span className="text-xs text-gray-600">{contrast}%</span>
+                  <span className="text-xs text-gray-600 dark:text-gray-400">{contrast}%</span>
                 </div>
 
                 <div className="space-y-2">
@@ -671,7 +696,7 @@ export default function Home() {
                     max="200"
                     className="w-full"
                   />
-                  <span className="text-xs text-gray-600">{saturation}%</span>
+                  <span className="text-xs text-gray-600 dark:text-gray-400">{saturation}%</span>
                 </div>
 
                 <div className="space-y-2">
@@ -685,7 +710,7 @@ export default function Home() {
                     max="100"
                     className="w-full"
                   />
-                  <span className="text-xs text-gray-600">{grayscale}%</span>
+                  <span className="text-xs text-gray-600 dark:text-gray-400">{grayscale}%</span>
                 </div>
 
                 <div className="space-y-2">
@@ -700,7 +725,7 @@ export default function Home() {
                     step="0.1"
                     className="w-full"
                   />
-                  <span className="text-xs text-gray-600">{blur}px</span>
+                  <span className="text-xs text-gray-600 dark:text-gray-400">{blur}px</span>
                 </div>
 
                 <div className="space-y-2">
@@ -714,7 +739,7 @@ export default function Home() {
                     max="100"
                     className="w-full"
                   />
-                  <span className="text-xs text-gray-600">{sepia}%</span>
+                  <span className="text-xs text-gray-600 dark:text-gray-400">{sepia}%</span>
                 </div>
 
                 <div className="space-y-2">
@@ -728,7 +753,7 @@ export default function Home() {
                     max="100"
                     className="w-full"
                   />
-                  <span className="text-xs text-gray-600">{invert}%</span>
+                  <span className="text-xs text-gray-600 dark:text-gray-400">{invert}%</span>
                 </div>
 
                 {/* Reset button */}
@@ -747,15 +772,11 @@ export default function Home() {
                 >
                   Reset Filters
                 </Button>
-              </div>
             </div>
+          </div>
+        </TabsContent>
 
-
-
-
-          </TabsContent>
-
-          <TabsContent value="pretext" className="mt-4">
+        <TabsContent value="pretext" className="mt-4">
             <div className="space-y-4">
               {/* Add text section first */}
               <div className="space-y-2">
@@ -810,17 +831,19 @@ export default function Home() {
           </TabsContent>
         </Tabs>
 
+       
+
         {/* Credits Section */}
-        <div className="mt-4 pt-4 border-t border-gray-300">
+        <div className="mt-4 pt-4 border-t border-gray-300 dark:border-gray-600">
           <div className="text-center space-y-2">
-            <div className="text-xs text-gray-600">Created by</div>
-            <div className="text-sm font-semibold text-gray-800">Psycho Coder</div>
+            <div className="text-xs text-gray-600 dark:text-gray-400">Created by</div>
+            <div className="text-sm font-semibold text-gray-800 dark:text-white">Psycho Coder</div>
             <div className="space-y-1">
               <a
                 href="https://github.com/itspsychocoder"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="block text-xs text-blue-600 hover:text-blue-800 transition-colors"
+                className="block text-xs text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition-colors"
               >
                 GitHub: itspsychocoder
               </a>
@@ -828,7 +851,7 @@ export default function Home() {
                 href="https://hussnainahmad.tech"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="block text-xs text-blue-600 hover:text-blue-800 transition-colors"
+                className="block text-xs text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-300 transition-colors"
               >
                 hussnainahmad.tech
               </a>
@@ -838,40 +861,15 @@ export default function Home() {
       </div>
 
       {/* Center canvas area */}
-      <div className="flex-1 bg-white p-4 flex flex-col">
-        {/* Zoom controls */}
+      <div className="flex-1 bg-white dark:bg-gray-900 p-4 flex flex-col">
         <div className="flex items-center justify-center mb-4 space-x-4">
-          <Label className="text-sm">Zoom:</Label>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setZoom(Math.max(0.1, zoom - 0.1))}
-          >
-            -
-          </Button>
-          <Input
-            type="range"
-            min="0.1"
-            max="1"
-            step="0.1"
-            value={zoom}
-            onChange={(e) => setZoom(parseFloat(e.target.value))}
-            className="w-32"
-          />
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setZoom(Math.min(1, zoom + 0.1))}
-          >
-            +
-          </Button>
-          <span className="text-sm text-gray-600">{Math.round(zoom * 100)}%</span>
+          <Label className="text-sm dark:text-white">Zoom:</Label>
+          {/* Add dark classes to zoom controls */}
         </div>
 
-        {/* Canvas container with fixed size and scrollbars */}
         <div className="flex-1 flex items-center justify-center">
           <div
-            className="border border-gray-300 bg-white shadow-lg overflow-auto"
+            className="border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 shadow-lg overflow-auto"
             style={{
               maxWidth: '600px',
               maxHeight: '500px',
@@ -879,6 +877,7 @@ export default function Home() {
               height: '500px'
             }}
           >
+            {/* Canvas stays the same */}
             <div className="flex items-center justify-center min-h-full">
               <canvas
                 ref={canvasRef}
@@ -894,7 +893,7 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Right sidebar */}
+      {/* Right sidebar - you'll need to update RightSidebar component too */}
       <RightSidebar
         fonts={availableFonts}
         texts={texts}

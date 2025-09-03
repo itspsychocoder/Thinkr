@@ -31,22 +31,89 @@ export default function Home() {
 
   const availableFonts = [
     {
-      label: "arial",
+      label: "Arial",
       name: "Arial"
     },
     {
-      label: "times",
+      label: "Helvetica",
+      name: "Helvetica"
+    },
+    {
+      label: "Times New Roman",
       name: "Times New Roman"
     },
     {
-
-      label: "helvetica",
-      name: "Helvetica"
+      label: "Times",
+      name: "Times"
+    },
+    {
+      label: "Courier New",
+      name: "Courier New"
+    },
+    {
+      label: "Courier",
+      name: "Courier"
+    },
+    {
+      label: "Verdana",
+      name: "Verdana"
+    },
+    {
+      label: "Georgia",
+      name: "Georgia"
+    },
+    {
+      label: "Palatino",
+      name: "Palatino"
+    },
+    {
+      label: "Garamond",
+      name: "Garamond"
+    },
+    {
+      label: "Bookman",
+      name: "Bookman"
+    },
+    {
+      label: "Comic Sans MS",
+      name: "Comic Sans MS"
+    },
+    {
+      label: "Trebuchet MS",
+      name: "Trebuchet MS"
+    },
+    {
+      label: "Arial Black",
+      name: "Arial Black"
+    },
+    {
+      label: "Impact",
+      name: "Impact"
+    },
+    {
+      label: "Lucida Sans Unicode",
+      name: "Lucida Sans Unicode"
+    },
+    {
+      label: "Tahoma",
+      name: "Tahoma"
+    },
+    {
+      label: "Lucida Console",
+      name: "Lucida Console"
+    },
+    {
+      label: "Monaco",
+      name: "Monaco"
+    },
+    {
+      label: "Bradley Hand ITC",
+      name: "Bradley Hand ITC"
     },
     {
       label: "noori",
       name: "Noto Jameel"
-    },
+    }
   ]
 
   const [selectedPlatform, setSelectedPlatform] = useState("instagram");
@@ -154,16 +221,31 @@ export default function Home() {
     texts.forEach(element => {
       const ctx = canvas.getContext("2d");
       ctx.font = `${element.size}px ${element.font}`;
-      const textWidth = ctx.measureText(element.value).width;
-      const textHeight = element.size;
+      
+    // Split text into lines for multiline detection
+    const lines = element.value.split('\n');
+    const lineHeight = element.size * 1.2;
+    const totalHeight = lines.length * lineHeight;
+    
+    // Get the widest line for click detection
+    let maxWidth = 0;
+    lines.forEach(line => {
+      const lineWidth = ctx.measureText(line).width;
+      if (lineWidth > maxWidth) maxWidth = lineWidth;
+    });
+
+    // Calculate text block boundaries
+    const startY = element.y - (totalHeight / 2);
+    const endY = element.y + (totalHeight / 2);
+
 
       // Check if click is within text bounds (considering center alignment)
       if (
-        x >= element.x - textWidth / 2 &&
-        x <= element.x + textWidth / 2 &&
-        y <= element.y &&
-        y >= element.y - textHeight
-      ) {
+        x >= element.x - maxWidth/2 &&
+        x <= element.x + maxWidth/2 &&
+        y >= startY &&
+        y <= endY
+      ){
         setDragging(true);
         setCurrentId(element.id);
         offsetRef.current = { x: x - element.x, y: y - element.y };
@@ -274,13 +356,25 @@ export default function Home() {
         ctx.direction = "rtl";
         ctx.textAlign = "center";
       } else {
-        ctx.font = `${text.size}px ${text.font}`;
+        ctx.font = `${text.size}px "${text.font}", Arial, sans-serif`;
         ctx.direction = "ltr";
         ctx.textAlign = "center";
       }
 
       ctx.fillStyle = text.color;
-      ctx.fillText(text.value, text.x, text.y);
+      // Split text by line breaks and draw each line
+      const lines = text.value.split('\n');
+      const lineHeight = text.size * 1.2; // 1.2 is a good line height multiplier
+
+      // Calculate starting Y position to center the text block
+      const totalHeight = lines.length * lineHeight;
+      const startY = text.y - (totalHeight / 2) + lineHeight;
+
+      lines.forEach((line, index) => {
+        const yPosition = startY + (index * lineHeight);
+        ctx.fillText(line, text.x, yPosition);
+      });
+
       ctx.restore();
     }
   }
@@ -717,30 +811,30 @@ export default function Home() {
         </Tabs>
 
         {/* Credits Section */}
-      <div className="mt-4 pt-4 border-t border-gray-300">
-        <div className="text-center space-y-2">
-          <div className="text-xs text-gray-600">Created by</div>
-          <div className="text-sm font-semibold text-gray-800">Psycho Coder</div>
-          <div className="space-y-1">
-            <a 
-              href="https://github.com/itspsychocoder" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="block text-xs text-blue-600 hover:text-blue-800 transition-colors"
-            >
-              GitHub: itspsychocoder
-            </a>
-            <a 
-              href="https://hussnainahmad.tech" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="block text-xs text-blue-600 hover:text-blue-800 transition-colors"
-            >
-              hussnainahmad.tech
-            </a>
+        <div className="mt-4 pt-4 border-t border-gray-300">
+          <div className="text-center space-y-2">
+            <div className="text-xs text-gray-600">Created by</div>
+            <div className="text-sm font-semibold text-gray-800">Psycho Coder</div>
+            <div className="space-y-1">
+              <a
+                href="https://github.com/itspsychocoder"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="block text-xs text-blue-600 hover:text-blue-800 transition-colors"
+              >
+                GitHub: itspsychocoder
+              </a>
+              <a
+                href="https://hussnainahmad.tech"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="block text-xs text-blue-600 hover:text-blue-800 transition-colors"
+              >
+                hussnainahmad.tech
+              </a>
+            </div>
           </div>
         </div>
-      </div>
       </div>
 
       {/* Center canvas area */}

@@ -19,14 +19,18 @@ export default function Home() {
     const canvasRef = useRef(null)
 
     const [imgObj, setImgObj] = useState(null)
-    const [text, setText] = useState("")
+   
+    const [texts, setTexts] = useState([])
 
     const [font, setFont] = useState("Arial")
     const [fontSize, setFontSize] = useState(40)
     const [fontColor, setFontColor] = useState("#FFFFFF")
 
-    const [textPos, setTextPos] = useState({ x: 100, y: 100 })
     const [dragging, setDragging] = useState(false)
+
+    const [currentId, setCurrentId] = useState(0)
+
+    const [text, setText] = useState("")
   
     // Keep track of mouse offset inside text
     const offsetRef = useRef({ x: 0, y: 0 })
@@ -69,17 +73,24 @@ export default function Home() {
         ctx.font = `${fontSize}px ${font}`
         const textWidth = ctx.measureText(text).width
         const textHeight = fontSize // rough estimate
-      
-        // ✅ check bounding box of current text
+
+        texts.forEach(element=> {
+
+            // ✅ check bounding box of current text
         if (
-          x >= textPos.x &&
-          x <= textPos.x + textWidth &&
-          y <= textPos.y &&
-          y >= textPos.y - textHeight
-        ) {
-          setDragging(true)
-          offsetRef.current = { x: x - textPos.x, y: y - textPos.y }
-        }
+            x >= element.x &&
+            x <= element.x + textWidth &&
+            y <= element.y &&
+            y >= element.y - textHeight
+          ) {
+            setDragging(true)
+            setCurrentId(element.id)
+            offsetRef.current = { x: x - element.x, y: y - element.y }
+          }
+            
+        })
+      
+        
       }
       
       const handleMouseMove = (e) => {
@@ -93,16 +104,22 @@ export default function Home() {
           x: x - offsetRef.current.x,
           y: y - offsetRef.current.y,
         }
+        let otherElements = texts.filter(text => text.id != currentId);
+        let elementToChange = texts.find(item => item.id === currentId);
+        elementToChange.x = newPos.x;
+        elementToChange.y = newPos.y;
+        console.log("Element Changed: ", elementToChange)
+
+        setTexts([...otherElements, elementToChange]);
       
-        setTextPos(newPos)
-        drawCanvas(imgObj, text, newPos)
+        drawCanvas(imgObj)
       }
 
       const handleMouseUp = () => {
         setDragging(false)
       }
 
-      const drawCanvas = (img, text, pos = textPos) => {
+      const drawCanvas = (img, newTexts) => {
         const canvas = canvasRef.current
         const ctx = canvas.getContext("2d")
       
@@ -112,19 +129,29 @@ export default function Home() {
       
         // Draw image
         ctx.drawImage(img, 0, 0)
-      
-        // Draw text at pos (NOT fixed)
-        ctx.font = `${fontSize}px ${font}`
-        ctx.fillStyle = fontColor
-        ctx.textAlign = "left"
-        ctx.fillText(text, pos.x, pos.y)
+
+        if (Array.isArray(newTexts) && newTexts.length > 0) {
+            newTexts.forEach(text => {
+                ctx.font = `${text.size}px ${text.font}`
+                ctx.fillStyle = text.color
+                ctx.textAlign = "center"
+                ctx.fillText(text.value, text.x, text.y)
+            });
+        }
+        else{
+            texts.forEach(text => {
+                ctx.font = `${text.size}px ${text.font}`
+                ctx.fillStyle = text.color
+                ctx.textAlign = "center"
+                ctx.fillText(text.value, text.x, text.y)
+            });
+        }
       }
       
       const handleTextAdd = () => {
-        if (imgObj && text) {
-          // ✅ Draw at current textPos
-          drawCanvas(imgObj, text, textPos)
-        }
+        let newId = texts.length + 1
+        let newItem = {id: newId, value: text, font: font, size: fontSize, color: fontColor, x:100, y:100}
+        setTexts([...texts, newItem]);
       }
 
 
@@ -143,6 +170,11 @@ export default function Home() {
         }
       })
 
+      useEffect(() => {
+        if (!canvasRef.current || !imgObj) return;
+        drawCanvas(imgObj, texts);
+      }, [texts, imgObj]);
+
   return (
     <div className="flex h-screen">
       {/* Left sidebar with tabs */}
@@ -160,6 +192,7 @@ export default function Home() {
               <h3 className="font-semibold">Upload Image</h3>
               <Input type="file" onChange={handleImageUpload} accept="image/*" className="w-full" />
               <Button className="w-full">Upload</Button>
+              <p>Selected Text: {currentId}</p>
             </div>
           </TabsContent>
           

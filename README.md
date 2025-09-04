@@ -6,9 +6,9 @@
 ---
 
 ##  Highlights
--  Bilingual quotes (English via API + curated Urdu set)  
+-  Bilingual quotes (English + Urdu)  
 -  Search Unsplash or upload your own background  
--  Real-time canvas preview with style controls (font, color, layout)  
+-  Real-time canvas preview with style controls (font, color, layout, filters)  
 -  One-click download for social sharing  
 
 ---
